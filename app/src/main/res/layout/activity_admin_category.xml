@@ -63,6 +63,16 @@
             android:layout_height="100dp"
             android:src="@drawable/pants"/>
     </LinearLayout>
+
+    <Button
+        android:id="@+id/admin_logout_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="20dp"
+        android:text="Logout"
+        android:textSize="18dp"
+        />
     
 
 </RelativeLayout>

@@ -30,12 +30,13 @@ import java.util.Calendar;
 import java.util.HashMap;
 
 public class ProductDetailActivity extends AppCompatActivity {
-//    private FloatingActionButton addToCartBtn;
+    //    private FloatingActionButton addToCartBtn;
     private Button addToCartButton;
     private ImageView productImage;
     private ElegantNumberButton numberButton;
     private TextView productPrice, productName, productDescription;
-    private String productID = "";
+    private String productID = "", state = "Normal";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,7 +45,7 @@ public class ProductDetailActivity extends AppCompatActivity {
         productID = getIntent().getStringExtra("pid");
 
 //        addToCartBtn = (FloatingActionButton) findViewById(R.id.add_product_to_cart_btn);
-        addToCartButton = (Button) findViewById(R.id.pd_add_to_cart_button); 
+        addToCartButton = (Button) findViewById(R.id.pd_add_to_cart_button);
         productImage = (ImageView) findViewById(R.id.product_image_details);
         numberButton = (ElegantNumberButton) findViewById(R.id.number_btn);
         productPrice = (TextView) findViewById(R.id.product_price_details);
@@ -53,16 +54,28 @@ public class ProductDetailActivity extends AppCompatActivity {
 
 
         getProductDetails(productID);
-        
+
         addToCartButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 addingToCartList();
+
+                if (state.equals("Order Placed") || state.equals("Order shipped")) {
+                    Toast.makeText(ProductDetailActivity.this, "You can add purchase more products, once your order is shipped or confrimed.", Toast.LENGTH_LONG).show();
+                } else {
+                    addingToCartList();
+                }
             }
 
 
         });
     }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+    }
+
 
     private void addingToCartList() {
         String saveCurrentTime, saveCurrentDate;
@@ -136,4 +149,32 @@ public class ProductDetailActivity extends AppCompatActivity {
             }
         });
     }
+
+    private void CheckOrderState() {
+        DatabaseReference ordersRef;
+        ordersRef = FirebaseDatabase.getInstance().getReference().child("Orders")
+                .child(Prevalent.currentOnlineUser.getPhone());
+
+        ordersRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    String shippingState = snapshot.child("state").getValue().toString();
+
+                    if (shippingState.equals("shipped")) {
+                        state = "Order Shipped";
+                    } else if (shippingState.equals("not shipped")) {
+                        state = "Order Placed";
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
 }
+
+
